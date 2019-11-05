@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import Post, Category, Tag
 from .adminforms import PostAdminForm
 from custom_site import custom_site
+from base_admin import BaseOwnerAdmin
 
 
 class CategoryOwnerFilter(admin.SimpleListFilter):
@@ -32,7 +34,7 @@ class PostInline(admin.StackedInline):
 
 
 @admin.register(Category, site=custom_site)
-class CategoryAdmin(admin. ModelAdmin):
+class CategoryAdmin(BaseOwnerAdmin):
     inlines = [PostInline]
     list_display = ('name', 'status', 'is_nav', 'created_time', 'post_count')
     fields = ('name', 'status', 'is_nav')
@@ -47,7 +49,7 @@ class CategoryAdmin(admin. ModelAdmin):
 
 
 @admin.register(Tag, site=custom_site)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(BaseOwnerAdmin):
     list_display = ('name', 'status', 'created_time', 'post_count')
     fields = ('name', 'status')
 
@@ -61,7 +63,7 @@ class TagAdmin(admin.ModelAdmin):
 
 
 @admin.register(Post, site=custom_site)
-class PostAdmin(admin.ModelAdmin):
+class PostAdmin(BaseOwnerAdmin):
     form = PostAdminForm
     list_display = ('title', 'category', 'status', 'created_time', 'operator')
     list_display_links = ()
@@ -125,3 +127,7 @@ class PostAdmin(admin.ModelAdmin):
         qs = super(PostAdmin, self).get_queryset(request)
         return qs.filter(owner=request.user)
 
+
+@admin.register(LogEntry, site=custom_site)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ['object_repr', 'object_id', 'action_flag', 'user', 'change_message']
